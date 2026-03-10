@@ -1,5 +1,17 @@
 AllCops:
   TargetRubyVersion: 3.2
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - 'test/**/*'
+    - 'bin/**/*'
+    - 'vendor/**/*'
+
+Layout/EndOfLine:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes
