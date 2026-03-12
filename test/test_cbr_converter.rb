@@ -3,46 +3,97 @@
 require "test_helper"
 
 class TestCbrConverter < Minitest::Test
-  ORIGINAL_GET_RESPONSE = Net::HTTP.method(:get_response)
-
   def setup
     @parser = CbrConverter::CurrencyParser.new
+    @url = CbrConverter::CurrencyParser::URL
   end
 
-  def test_raise_error_on_500
-    mock_http_response(Net::HTTPInternalServerError.new("1.1", "500", "Internal Error")) do
-      assert_raises(CbrConverter::Error) do
-        @parser.fetch_rates
-      end
+  def test_fetch_rates_raise_error_on_500
+    stub_request(:get, @url).to_return(status: 500)
+
+    assert_raises(CbrConverter::Error) do
+      @parser.fetch_rates
     end
   end
 
-  def test_raise_error_on_400
-    mock_http_response(Net::HTTPBadRequest.new("1.1", "400", "Bad Request")) do
-      assert_raises(CbrConverter::Error) do
-        @parser.fetch_rates
-      end
+  def test_fetch_rates_raise_error_on_400
+    stub_request(:get, @url).to_return(status: 400)
+
+    assert_raises(CbrConverter::Error) do
+      @parser.fetch_rates
     end
   end
 
-  def test_returns_xml_200
-    fake_xml = "<ValCurs><Valute><Value>75,12</Value></Valute></ValCurs>"
-    response = Net::HTTPOK.new("1.1", "200", "OK")
+  def test_fetch_rates_returns_xml_200
+    fake_xml = <<~XML
+      <ValCurs Date="11.03.2026">
+        <Valute>
+          <CharCode>USD</CharCode>
+          <Nominal>1</Nominal>
+          <Value>91,4500</Value>
+        </Valute>
+      </ValCurs>
+    XML
 
-    response.instance_variable_set("@body", fake_xml)
-    response.instance_variable_set("@read", true)
+    stub_request(:get, @url).to_return(status: 200, body: fake_xml)
 
-    mock_http_response(response) do
-      assert_equal fake_xml, @parser.fetch_rates
-    end
+    assert_equal fake_xml, @parser.fetch_rates
   end
 
-  private
+  def test_parse_rates_returns_correct_hash
+    fake_xml = <<~XML
+      <ValCurs Date="11.03.2026">
+        <Valute>
+          <CharCode>USD</CharCode>
+          <Nominal>1</Nominal>
+          <Value>91,4500</Value>
+        </Valute>
+        <Valute>
+          <CharCode>KZT</CharCode>
+          <Nominal>100</Nominal>
+          <Value>20,1500</Value>
+        </Valute>
+      </ValCurs>
+    XML
 
-  def mock_http_response(mock_response)
-    Net::HTTP.define_singleton_method(:get_response) { |_uri| mock_response }
-    yield
-  ensure
-    Net::HTTP.define_singleton_method(:get_response, &ORIGINAL_GET_RESPONSE)
+    stub_request(:get, @url).to_return(status: 200, body: fake_xml)
+
+    rates = @parser.parse_rates
+
+    expected_rates = {
+      "USD" => BigDecimal("91.45"),
+      "KZT" => BigDecimal("0.2015")
+    }
+
+    assert_equal expected_rates, rates
+  end
+
+  def test_parse_rates_returns_empty_hash
+    fake_xml = <<~XML
+      <ValCurs Date="11.03.2026">
+      </ValCurs>
+    XML
+
+    stub_request(:get, @url).to_return(status: 200, body: fake_xml)
+
+    assert_empty @parser.parse_rates
+  end
+
+  def test_parse_rates_zero_nominal
+    fake_xml = <<~XML
+      <ValCurs>
+        <Valute>
+          <CharCode>ERR</CharCode>
+          <Nominal>0</Nominal>
+          <Value>10,00</Value>
+        </Valute>
+      </ValCurs>
+    XML
+
+    stub_request(:get, @url).to_return(status: 200, body: fake_xml)
+
+    rates = @parser.parse_rates
+
+    refute_includes rates, "ERR"
   end
 end
