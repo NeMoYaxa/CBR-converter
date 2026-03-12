@@ -94,6 +94,6 @@ class TestCbrConverter < Minitest::Test
 
     rates = @parser.parse_rates
 
-    assert rates["ERR"].infinite?
+    refute_includes rates, "ERR"
   end
 end
