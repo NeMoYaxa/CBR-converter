@@ -102,6 +102,7 @@ DEPENDENCIES
   cbr_converter!
   irb
   minitest (~> 5.16)
+  nokogiri
   rake (~> 13.0)
   rubocop (~> 1.21)
   webmock
