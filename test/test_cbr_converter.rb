@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+WebMock.allow_net_connect!
 
 class TestCbrConverter < Minitest::Test
   def setup
@@ -95,5 +96,21 @@ class TestCbrConverter < Minitest::Test
     rates = @parser.parse_rates
 
     refute_includes rates, "ERR"
+  end
+
+  def test_get_currency_rate_returns_truncated_value
+    CbrConverter.stub :current_currency_rates, {"USD" => BigDecimal("78.9514")} do
+      rate = CbrConverter.get_currency_rate("USD")
+
+      assert_kind_of BigDecimal, rate
+      assert_equal BigDecimal("78.95"), rate
+    end
+  end
+
+  def test_get_currency_rate_for_rub
+    CbrConverter.stub :current_currency_rates, { "RUB" => BigDecimal("1.0") } do
+      rate = CbrConverter.get_currency_rate("RUB")
+      assert_equal BigDecimal("1.0"), rate
+    end
   end
 end
