@@ -5,3 +5,4 @@ require "cbr_converter"
 
 require "minitest/autorun"
 require "webmock/minitest"
+require "minitest/mock"
