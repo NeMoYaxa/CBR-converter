@@ -99,7 +99,7 @@ class TestCbrConverter < Minitest::Test
   end
 
   def test_get_currency_rate_returns_truncated_value
-    CbrConverter.stub :current_currency_rates, {"USD" => BigDecimal("78.9514")} do
+    CbrConverter.stub :current_currency_rates, { "USD" => BigDecimal("78.9514") } do
       rate = CbrConverter.get_currency_rate("USD")
 
       assert_kind_of BigDecimal, rate
@@ -112,5 +112,44 @@ class TestCbrConverter < Minitest::Test
       rate = CbrConverter.get_currency_rate("RUB")
       assert_equal BigDecimal("1.0"), rate
     end
+  end
+
+  def test_get_currency_rate_for_non_existent
+    CbrConverter.stub :current_currency_rates, {} do
+      assert_raises CbrConverter::Error do
+        CbrConverter.get_currency_rate("ERR")
+      end
+    end
+  end
+
+  def test_compare_currencies_returns_truncated_ratio
+    rates = { "USD" => BigDecimal("84.0"), "EUR" => BigDecimal("96.0") }
+
+    CbrConverter.stub :current_currency_rates, rates do
+      ratio = CbrConverter.compare_currencies("USD", "EUR")
+      assert_equal BigDecimal("0.87"), ratio
+    end
+  end
+
+  def test_available_currencies_returns_correct_hash
+    rates = { "USD" => BigDecimal("84.0"), "EUR" => BigDecimal("96.0"), "RUB" => BigDecimal("1.0") }
+
+    CbrConverter.stub :current_currency_rates, rates do
+      keys = CbrConverter.available_currencies
+      assert_equal ["EUR", "RUB", "USD"], keys
+    end
+  end
+
+  def test_available_currencies_returns_empty_hash
+    CbrConverter.stub :current_currency_rates, {} do
+      keys = CbrConverter.available_currencies
+      assert_equal [], keys
+    end
+  end
+
+  def test_refresh_rates_instance_variable_set_to_nil
+    CbrConverter.instance_variable_set(:@current_currency_rates, { "USD" => BigDecimal("86.1764") })
+    CbrConverter.refresh_rates!
+    assert_nil CbrConverter.instance_variable_get(:@current_currency_rates)
   end
 end
