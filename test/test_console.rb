@@ -5,10 +5,9 @@ require "stringio"
 
 class TestCbrConverterConsole < Minitest::Test
   def setup
-    # Создаем экземпляр консоли
+
     @console = CbrConverterConsole.new
 
-    # Перехватываем вывод в консоль
     @original_stdout = $stdout
     @output = StringIO.new
     $stdout = @output
@@ -23,7 +22,6 @@ class TestCbrConverterConsole < Minitest::Test
   end
 
   def teardown
-    # Восстанавливаем вывод
     $stdout = @original_stdout
   end
 
@@ -35,7 +33,6 @@ class TestCbrConverterConsole < Minitest::Test
     @output.string = ""
   end
 
-  # === ТЕСТЫ ===
 
   def test_initialize_sets_running_true
     assert @console.instance_variable_get(:@running)
