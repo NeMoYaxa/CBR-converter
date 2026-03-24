@@ -103,7 +103,7 @@ class TestCbrConverter < Minitest::Test
       rate = CbrConverter.get_currency_rate("USD")
 
       assert_kind_of BigDecimal, rate
-      assert_equal BigDecimal("78.95"), rate
+      assert_equal BigDecimal("78.9514"), rate
     end
   end
 
@@ -127,7 +127,7 @@ class TestCbrConverter < Minitest::Test
 
     CbrConverter.stub :current_currency_rates, rates do
       ratio = CbrConverter.compare_currencies("USD", "EUR")
-      assert_equal BigDecimal("0.87"), ratio
+      assert_equal BigDecimal("0.875"), ratio
     end
   end
 

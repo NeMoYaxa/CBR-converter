@@ -24,7 +24,7 @@ module CbrConverter
 
     raise Error, "Валюта (#{currency}) не найдена в данных ЦБ" unless rates[currency]
 
-    rates[currency].truncate(2)
+    rates[currency].truncate(4)
   end
 
   def self.get_metal_rate(metal)
@@ -40,7 +40,7 @@ module CbrConverter
     first_rate = get_currency_rate(first_currency)
     second_rate = get_currency_rate(second_currency)
 
-    (first_rate / second_rate).truncate(2)
+    (first_rate / second_rate).truncate(4)
   end
 
   def self.compare_metals(first_metal, second_metal)
