@@ -41,15 +41,14 @@ class TestCbrConverterConsole < Minitest::Test
   def test_initialize_has_all_commands
     commands = @console.instance_variable_get(:@commands)
 
-    assert_includes commands.keys, "help"
-    assert_includes commands.keys, "rates"
-    assert_includes commands.keys, "rate"
-    assert_includes commands.keys, "compare"
-    assert_includes commands.keys, "currencies"
-    assert_includes commands.keys, "refresh"
-    assert_includes commands.keys, "convert"
-    assert_includes commands.keys, "exit"
-    assert_includes commands.keys, "quit"
+    assert_includes commands.keys, "1"
+    assert_includes commands.keys, "2"
+    assert_includes commands.keys, "3"
+    assert_includes commands.keys, "4"
+    assert_includes commands.keys, "5"
+    assert_includes commands.keys, "6"
+    assert_includes commands.keys, "7"
+    assert_includes commands.keys, "8"
   end
 
   def test_show_help_displays_help_message
@@ -155,14 +154,14 @@ class TestCbrConverterConsole < Minitest::Test
   end
 
   def test_parse_and_execute_help
-    @console.send(:parse_and_execute, "help")
+    @console.send(:parse_and_execute, "7")
 
     assert_includes output, "Доступные команды:"
   end
 
   def test_parse_and_execute_rates
     CbrConverter.stub :current_currency_rates, @mock_rates do
-      @console.send(:parse_and_execute, "rates")
+      @console.send(:parse_and_execute, "1")
 
       assert_includes output, "USD  : 91.45 руб."
     end
@@ -172,13 +171,13 @@ class TestCbrConverterConsole < Minitest::Test
     rate = BigDecimal("1234.56")
     formatted = @console.send(:format_rate, rate)
 
-    assert_equal "1,234.56", formatted
+    assert_equal "1234.56", formatted
   end
 
   def test_format_number_with_bigdecimal
     number = BigDecimal("1234.567")
     formatted = @console.send(:format_number, number)
 
-    assert_equal "1,234.57", formatted
+    assert_equal "1234.567", formatted
   end
 end

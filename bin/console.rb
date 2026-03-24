@@ -1,21 +1,20 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-
 require "cbr_converter"
+
 class CbrConverterConsole
   def initialize
     @running = true
     @commands = {
-      "help" => -> { show_help },
-      "rates" => -> { show_rates },
-      "rate" => ->(currency = nil) { show_rate(currency) },
-      "compare" => ->(first = nil, second = nil) { compare_currencies(first, second) },
-      "currencies" => -> { show_currencies },
-      "refresh" => -> { refresh_rates },
-      "convert" => ->(amount = nil, from = nil, to = nil) { convert_currency(amount, from, to) },
-      "exit" => -> { exit_console },
-      "quit" => -> { exit_console }
+      "1" => -> { show_rates },
+      "2" => ->(currency = nil) { show_rate(currency) },
+      "3" => ->(first = nil, second = nil) { compare_currencies(first, second) },
+      "4" => -> { show_currencies },
+      "5" => ->(amount = nil, from = nil, to = nil) { convert_currency(amount, from, to) },
+      "6" => -> { refresh_rates },
+      "7" => -> { show_help },
+      "8" => -> { exit_console }
     }
   end
 
@@ -57,19 +56,19 @@ class CbrConverterConsole
 
   def show_help
     puts "\nДоступные команды:"
-    puts "  rates                    - Показать все курсы валют"
-    puts "  rate <код валюты>        - Показать курс конкретной валюты"
-    puts "  compare <валюта1> <валюта2> - Сравнить две валюты"
-    puts "  currencies               - Показать список доступных валют"
-    puts "  convert <сумма> <из> <в> - Конвертировать сумму из одной валюты в другую"
-    puts "  refresh                  - Обновить курсы валют"
-    puts "  help                     - Показать эту справку"
-    puts "  exit / quit              - Выйти из программы"
+    puts "  1. rates                       - Показать все курсы валют"
+    puts "  2. rate <код валюты>           - Показать курс конкретной валюты"
+    puts "  3. compare <валюта1> <валюта2> - Сравнить две валюты"
+    puts "  4. currencies                  - Показать список доступных валют"
+    puts "  5. convert <сумма> <из> <в>    - Конвертировать сумму из одной валюты в другую"
+    puts "  6. refresh                     - Обновить курсы валют"
+    puts "  7. help                        - Показать эту справку"
+    puts "  8. exit                        - Выйти из программы"
     puts "\nПримеры:"
-    puts "  rate USD"
-    puts "  compare USD EUR"
-    puts "  convert 100 USD RUB"
-    puts "  convert 50.5 EUR USD"
+    puts "  2 USD"
+    puts "  3 USD EUR"
+    puts "  5 100 USD RUB"
+    puts "  5 50.5 EUR USD"
   end
 
   def show_rates
@@ -82,7 +81,8 @@ class CbrConverterConsole
     rates.each do |currency, rate|
       next if currency == "RUB"
 
-      puts "  #{currency.ljust(5)}: #{format_rate(rate)} руб."
+      value = CbrConverter.get_currency_rate(currency)
+      puts "  #{currency.ljust(5)}: #{format_rate(value)} руб."
     end
 
     puts "\n  RUB   : 1.00 руб."
@@ -94,7 +94,7 @@ class CbrConverterConsole
   def show_rate(currency)
     if currency.nil?
       puts "Использование: rate <код валюты>"
-      puts "Пример: rate USD"
+      puts " Пример: rate USD"
       return
     end
 
@@ -110,7 +110,7 @@ class CbrConverterConsole
   def compare_currencies(first, second)
     if first.nil? || second.nil?
       puts "Использование: compare <валюта1> <валюта2>"
-      puts "Пример: compare USD EUR"
+      puts " Пример: compare USD EUR"
       return
     end
 
@@ -121,7 +121,9 @@ class CbrConverterConsole
 
     puts "\nСравнение #{first} и #{second}:"
     puts "  1 #{first} = #{format_rate(ratio)} #{second}"
-    puts "  #{format_rate(1.0 / ratio)} #{first} = 1 #{second}"
+
+    reverse_ratio = 1.0 / ratio
+    puts "  #{format("%.4f", reverse_ratio).gsub(/\.?0+$/, '')} #{first} = 1 #{second}"
   rescue CbrConverter::Error => e
     puts "Ошибка: #{e.message}"
   end
@@ -141,14 +143,14 @@ class CbrConverterConsole
   def refresh_rates
     puts "Обновление курсов валют..."
     CbrConverter.refresh_rates!
-    puts "Курсы успешно обновлены!"
+    puts " Курсы успешно обновлены!"
   end
 
   def convert_currency(amount, from, to)
     if amount.nil? || from.nil? || to.nil?
       puts "Использование: convert <сумма> <из валюты> <в валюту>"
-      puts "Пример: convert 100 USD RUB"
-      puts "Пример: convert 50.5 EUR USD"
+      puts " Пример: convert 100 USD RUB"
+      puts " Пример: convert 50.5 EUR USD"
       return
     end
 
@@ -166,7 +168,7 @@ class CbrConverterConsole
     to_rate = CbrConverter.get_currency_rate(to)
 
     result_in_rub = amount * from_rate
-    result = result_in_rub / to_rate
+    result = BigDecimal(result_in_rub / to_rate).to_s
 
     puts "\nРезультат конвертации:"
     puts "  #{format_number(amount)} #{from} = #{format_number(result)} #{to}"
@@ -182,14 +184,17 @@ class CbrConverterConsole
   end
 
   def format_rate(rate)
-    rate.to_s("F").gsub(/\B(?=(\d{3})+(?!\d))/, ",")
+    rate.to_s("F")
   end
 
   def format_number(number)
     if number.is_a?(BigDecimal)
-      number = number.to_f
+      formatted = number.to_s('F')
+    else
+      formatted = sprintf("%.4f", number)
+      formatted.gsub!(/\.?0+$/, '')
     end
-    sprintf("%.2f", number).gsub(/\B(?=(\d{3})+(?!\d))/, ",")
+    formatted
   end
 end
 
