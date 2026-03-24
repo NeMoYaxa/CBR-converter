@@ -56,4 +56,8 @@ module CbrConverter
   def self.refresh_rates!
     @current_currency_rates = nil
   end
+
+  def self.refresh_metals!
+    @current_metal_rates = nil
+  end
 end
