@@ -3,6 +3,7 @@
 require_relative "cbr_converter/version"
 require_relative "cbr_converter/currency_parser"
 require_relative "cbr_converter/metal_parser"
+require_relative "cbr_converter/console"
 
 module CbrConverter
   class Error < StandardError; end

@@ -6,7 +6,7 @@ require "stringio"
 class TestCbrConverterConsole < Minitest::Test
   def setup
 
-    @console = CbrConverterConsole.new
+    @console = CbrConverter::CLI.new
 
     @original_stdout = $stdout
     @output = StringIO.new
