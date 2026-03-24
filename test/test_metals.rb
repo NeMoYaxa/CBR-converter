@@ -38,7 +38,7 @@ class TestMetalsConverter < Minitest::Test
   def test_get_metal_rate_returns_truncated_value
     CbrConverter.stub :current_metal_rates, { gold: BigDecimal("7123.4567") } do
       rate = CbrConverter.get_metal_rate(:gold)
-      assert_equal BigDecimal("7123.45"), rate
+      assert_equal BigDecimal("7123.4567"), rate
     end
   end
 

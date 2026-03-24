@@ -33,7 +33,7 @@ module CbrConverter
 
     raise Error, "Металл (#{metal}) не найден в данных ЦБ" unless rates[metal_sym]
 
-    rates[metal_sym].truncate(2)
+    rates[metal_sym].truncate(4)
   end
 
   def self.compare_currencies(first_currency, second_currency)
@@ -47,7 +47,7 @@ module CbrConverter
     first_rate = get_metal_rate(first_metal)
     second_rate = get_metal_rate(second_metal)
 
-    (first_rate / second_rate).truncate(2)
+    (first_rate / second_rate).truncate(4)
   end
 
   def self.available_currencies
