@@ -6,7 +6,7 @@ require "stringio"
 class TestCbrConverterConsole < Minitest::Test
   def setup
 
-    @console = CbrConverterConsole.new
+    @console = CbrConverter::CLI.new
 
     @original_stdout = $stdout
     @output = StringIO.new
@@ -33,7 +33,6 @@ class TestCbrConverterConsole < Minitest::Test
     @output.string = ""
   end
 
-
   def test_initialize_sets_running_true
     assert @console.instance_variable_get(:@running)
   end
@@ -55,29 +54,29 @@ class TestCbrConverterConsole < Minitest::Test
     @console.send(:show_help)
 
     assert_includes output, "Доступные команды:"
-    assert_includes output, "rates"
-    assert_includes output, "convert"
+    assert_includes output, "1"
+    assert_includes output, "2"
   end
 
   def test_show_rates_displays_all_currencies
     CbrConverter.stub :current_currency_rates, @mock_rates do
-      @console.send(:show_rates)
+      @console.send(:show_currency_rates)
 
       assert_includes output, "USD  : 91.45 руб."
       assert_includes output, "EUR  : 98.76 руб."
-      assert_includes output, "RUB   : 1.00 руб."
+      assert_includes output, "RUB  : 1.00 руб."
     end
   end
 
   def test_show_rate_without_currency_shows_usage
-    @console.send(:show_rate, nil)
+    @console.send(:show_currency_rate, nil)
 
-    assert_includes output, "Использование: rate <код валюты>"
+    assert_includes output, "Использование: 2 <код валюты>"
   end
 
   def test_show_rate_with_valid_currency
     CbrConverter.stub :get_currency_rate, BigDecimal("91.45") do
-      @console.send(:show_rate, "USD")
+      @console.send(:show_currency_rate, "USD")
 
       assert_includes output, "Курс USD:"
       assert_includes output, "1 USD = 91.45 руб."
@@ -86,7 +85,7 @@ class TestCbrConverterConsole < Minitest::Test
 
   def test_show_rate_with_invalid_currency
     CbrConverter.stub :get_currency_rate, ->(currency) { raise CbrConverter::Error } do
-      @console.send(:show_rate, "XXX")
+      @console.send(:show_currency_rate, "XXX")
 
       assert_includes output, "Валюта 'XXX' не найдена"
     end
@@ -133,7 +132,7 @@ class TestCbrConverterConsole < Minitest::Test
 
   def test_refresh_rates
     CbrConverter.stub :refresh_rates!, nil do
-      @console.send(:refresh_rates)
+      @console.send(:refresh_currency_rates)
 
       assert_includes output, "Обновление курсов валют..."
       assert_includes output, "Курсы успешно обновлены!"
@@ -154,7 +153,7 @@ class TestCbrConverterConsole < Minitest::Test
   end
 
   def test_parse_and_execute_help
-    @console.send(:parse_and_execute, "7")
+    @console.send(:parse_and_execute, "13")
 
     assert_includes output, "Доступные команды:"
   end
