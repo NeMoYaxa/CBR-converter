@@ -96,7 +96,7 @@ module CbrConverter
       puts "-" * 50
 
       rates = CbrConverter.current_currency_rates
-      rates = rates.sort_by { |currency, _| currency }
+      rates = rates.sort_by { |currency, _| currency }.to_h
 
       rates.each_key do |currency|
         next if currency == "RUB"
@@ -203,7 +203,7 @@ module CbrConverter
       puts "-" * 50
 
       rates = CbrConverter.current_metal_rates
-      rates = rates.sort_by { |metal, _| metal }
+      rates = rates.sort_by { |metal, _| metal }.to_h
 
       rates.each_key do |metal|
         value = CbrConverter.get_metal_rate(metal)
