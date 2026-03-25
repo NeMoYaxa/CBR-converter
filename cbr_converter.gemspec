@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors = ["Batuev Yakov Denisovich"]
   spec.email = ["batuev@sfedu.ru"]
 
-  spec.summary = "Библиотека для конвертации валют по курсам ЦБ РФ."
+  spec.summary = "Библиотека для конвертации валют и драгоценных металлов по курсам ЦБ РФ."
   spec.description = "Позволяет получать актуальные данные XML с сайта Центрального Банка РФ и выполнять конвертацию."
   spec.homepage = "https://github.com/NeMoYaxa/CBR-converter"
   spec.license = "MIT"
